@@ -13,8 +13,6 @@ jobs:
       matrix:
         python-version: ["3.12"]
 
-    env:
-      USE_MKDOCS: ${{ secrets.USE_MKDOCS }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,7 +28,9 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --python ${{ matrix.python-version }}
+        run: |
+          uv sync --python ${{ matrix.python-version }}
+          uv pip install py3dep
 
       - name: Install optional dependencies
         run: |
@@ -46,7 +46,9 @@ jobs:
       - name: Build the book
         run: |
           uv run jupyter-book build .
-
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v3.0
         with:
